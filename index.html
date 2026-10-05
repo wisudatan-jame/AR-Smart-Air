@@ -437,8 +437,30 @@ const scene = document.querySelector("a-scene");
 const target = document.getElementById("airTarget");
 
 
-/* AR READY */
+/* DEMO MODE + AR READY */
 
+function enterDemoMode(){
+
+  loading.classList.add("hidden");
+
+  top.classList.add("show");
+
+  dashboard.classList.add("show");
+
+  demoMessage.innerText =
+    "DEMO MODE — ยังไม่ได้เชื่อมต่อ Hardware";
+
+}
+
+/* เปิด Demo ทันที ไม่ต้องรอ AR */
+setTimeout(() => {
+
+  enterDemoMode();
+
+}, 1500);
+
+
+/* ถ้า AR พร้อม */
 scene.addEventListener("arReady", () => {
 
   loading.classList.add("hidden");
@@ -447,16 +469,29 @@ scene.addEventListener("arReady", () => {
 
 
 /* TARGET FOUND */
-
 target.addEventListener("targetFound", () => {
 
   top.classList.add("show");
+
   dashboard.classList.add("show");
+
+  demoMessage.innerText =
+    "AR MODE — ตรวจพบ Target";
 
 });
 
 
 /* TARGET LOST */
+target.addEventListener("targetLost", () => {
+
+  top.classList.add("show");
+
+  dashboard.classList.add("show");
+
+  demoMessage.innerText =
+    "DEMO MODE — ยังไม่ได้เชื่อมต่อ Hardware";
+
+});
 
 target.addEventListener("targetLost", () => {
 
