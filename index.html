@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="th">
+
+<head>
+  <meta charset="UTF-8">
+
+  <meta name="viewport"
+        content="width=device-width,
+                 initial-scale=1.0,
+                 maximum-scale=1.0,
+                 user-scalable=no">
+
+  <title>AR Smart Air</title>
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <!-- MindAR -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+
+    /* แผงควบคุม */
+    #controlPanel {
+      position: fixed;
+      left: 50%;
+      bottom: 25px;
+      transform: translateX(-50%);
+
+      width: 300px;
+      padding: 20px;
+
+      background: rgba(0, 30, 60, 0.90);
+      color: white;
+
+      border-radius: 20px;
+
+      text-align: center;
+
+      z-index: 9999;
+
+      display: none;
+
+      box-shadow:
+        0 8px 30px rgba(0,0,0,0.4);
+    }
+
+    .title {
+      font-size: 25px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      opacity: 0.8;
+      margin-bottom: 15px;
+    }
+
+    #status {
+      font-size: 18px;
+      margin: 10px;
+    }
+
+    #temperature {
+      font-size: 42px;
+      font-weight: bold;
+      margin: 15px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+
+      margin-top: 8px;
+
+      border: none;
+      border-radius: 12px;
+
+      font-size: 18px;
+      font-weight: bold;
+
+      cursor: pointer;
+    }
+
+    #onButton {
+      background: #16a34a;
+      color: white;
+    }
+
+    #offButton {
+      background: #dc2626;
+      color: white;
+    }
+
+    #demoText {
+      margin-top: 12px;
+      font-size: 12px;
+      opacity: 0.7;
+    }
+
+  </style>
+
+</head>
+
+
+<body>
+
+
+  <!-- ========================= -->
+  <!-- AR SCENE                  -->
+  <!-- ========================= -->
+
+  <a-scene
+    mindar-image="
+      imageTargetSrc: ./targets.mind;
+      maxTrack: 1;
+    "
+
+    color-space="sRGB"
+
+    renderer="
+      colorManagement: true;
+      physicallyCorrectLights
+    "
+
+    vr-mode-ui="enabled: false"
+
+    device-orientation-permission-ui="
+      enabled: false
+    ">
+
+
+    <!-- Camera -->
+
+    <a-camera
+      position="0 0 0"
+      look-controls="enabled: false">
+    </a-camera>
+
+
+    <!-- AR Target -->
+
+    <a-entity
+      id="target"
+      mindar-image-target="
+        targetIndex: 0
+      ">
+
+      <!-- AR Air Icon -->
+
+      <a-text
+        value="SMART AIR"
+        align="center"
+        color="#00e5ff"
+        width="2"
+        position="0 0.6 0">
+      </a-text>
+
+
+      <!-- Temperature -->
+
+      <a-text
+        value="25°C"
+        align="center"
+        color="#ffffff"
+        width="2"
+        position="0 0.25 0">
+      </a-text>
+
+
+      <!-- Status -->
+
+      <a-text
+        id="arStatus"
+        value="OFF"
+        align="center"
+        color="#ff4444"
+        width="2"
+        position="0 -0.1 0">
+      </a-text>
+
+    </a-entity>
+
+  </a-scene>
+
+
+  <!-- ========================= -->
+  <!-- CONTROL PANEL             -->
+  <!-- ========================= -->
+
+  <div id="controlPanel">
+
+    <div class="title">
+      ❄️ SMART AIR
+    </div>
+
+    <div class="subtitle">
+      AR Air Conditioner Control
+    </div>
+
+
+    <div id="status">
+      🔴 สถานะ: OFF
+    </div>
+
+
+    <div id="temperature">
+      25°C
+    </div>
+
+
+    <button id="onButton">
+      🟢 เปิดแอร์
+    </button>
+
+
+    <button id="offButton">
+      🔴 ปิดแอร์
+    </button>
+
+
+    <div id="demoText">
+      DEMO MODE — ยังไม่ได้เชื่อมต่อแอร์จริง
+    </div>
+
+  </div>
+
+
+  <!-- ========================= -->
+  <!-- JAVASCRIPT                -->
+  <!-- ========================= -->
+
+  <script>
+
+    const target =
+      document.querySelector("#target");
+
+
+    const panel =
+      document.querySelector("#controlPanel");
+
+
+    const status =
+      document.querySelector("#status");
+
+
+    const arStatus =
+      document.querySelector("#arStatus");
+
+
+    /*
+     * เมื่อกล้องเจอ Marker
+     */
+
+    target.addEventListener(
+      "targetFound",
+      function () {
+
+        panel.style.display = "block";
+
+      }
+    );
+
+
+    /*
+     * เมื่อกล้องหา Marker ไม่เจอ
+     */
+
+    target.addEventListener(
+      "targetLost",
+      function () {
+
+        panel.style.display = "none";
+
+      }
+    );
+
+
+    /*
+     * ปุ่มเปิดแอร์
+     */
+
+    document
+      .querySelector("#onButton")
+      .addEventListener(
+        "click",
+        function () {
+
+          status.innerHTML =
+            "🟢 สถานะ: ON";
+
+          arStatus.setAttribute(
+            "value",
+            "ON"
+          );
+
+          arStatus.setAttribute(
+            "color",
+            "#00ff66"
+          );
+
+        }
+      );
+
+
+    /*
+     * ปุ่มปิดแอร์
+     */
+
+    document
+      .querySelector("#offButton")
+      .addEventListener(
+        "click",
+        function () {
+
+          status.innerHTML =
+            "🔴 สถานะ: OFF";
+
+          arStatus.setAttribute(
+            "value",
+            "OFF"
+          );
+
+          arStatus.setAttribute(
+            "color",
+            "#ff4444"
+          );
+
+        }
+      );
+
+  </script>
+
+
+</body>
+
+</html>
