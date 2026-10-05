@@ -1,595 +1,619 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SMART AIR — AR Demo</title>
 
-  <title>SMART AIR AR</title>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
-  <!-- A-Frame -->
-  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<style>
+*{box-sizing:border-box}
 
-  <!-- MindAR -->
-  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+body{
+  margin:0;
+  overflow:hidden;
+  font-family:Arial,"Noto Sans Thai",sans-serif;
+  background:#07172b;
+}
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+/* LOADING */
+#loading{
+  position:fixed;
+  inset:0;
+  z-index:1000;
+  background:#07172b;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  color:white;
+  text-align:center;
+}
 
-    body {
-      margin: 0;
-      overflow: hidden;
-      font-family: Arial, "Noto Sans Thai", sans-serif;
-      background: #07172b;
-    }
+#loading .logo{
+  font-size:42px;
+  font-weight:800;
+}
 
-    /* Loading */
-    #loading {
-      position: fixed;
-      inset: 0;
-      z-index: 1000;
-      background: #07172b;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      color: white;
-      text-align: center;
-    }
+#loading .sub{
+  margin-top:12px;
+  font-size:18px;
+  opacity:.8;
+}
 
-    #loading .logo {
-      font-size: 46px;
-      font-weight: 800;
-      letter-spacing: 1px;
-      margin-bottom: 15px;
-    }
+#loading.hidden{display:none}
 
-    #loading .sub {
-      font-size: 20px;
-      opacity: 0.85;
-    }
+/* TOP */
+#top{
+  position:fixed;
+  top:16px;
+  left:50%;
+  transform:translateX(-50%);
+  width:calc(100% - 28px);
+  max-width:430px;
+  z-index:30;
 
-    #loading.hidden {
-      display: none;
-    }
+  padding:13px 17px;
+  border-radius:20px;
 
-    /* Top status */
-    #topBar {
-      position: fixed;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 20;
+  background:rgba(5,20,40,.88);
+  border:1px solid rgba(255,255,255,.15);
+  backdrop-filter:blur(15px);
 
-      width: calc(100% - 32px);
-      max-width: 430px;
+  color:white;
+  display:none;
+}
 
-      padding: 12px 18px;
-      border-radius: 18px;
+#top.show{display:block}
 
-      background: rgba(7, 23, 43, 0.88);
-      border: 1px solid rgba(255,255,255,0.15);
+.topLine{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-      color: white;
-      text-align: center;
+.brand{
+  font-size:18px;
+  font-weight:bold;
+}
 
-      backdrop-filter: blur(12px);
+.connected{
+  font-size:11px;
+  color:#54e39b;
+}
 
-      display: none;
-    }
+.location{
+  margin-top:5px;
+  font-size:12px;
+  color:#70dfff;
+}
 
-    #topBar.show {
-      display: block;
-    }
+/* DASHBOARD */
+#dashboard{
+  position:fixed;
+  left:50%;
+  bottom:12px;
+  transform:translateX(-50%);
+  width:calc(100% - 18px);
+  max-width:430px;
+  z-index:40;
 
-    #deviceName {
-      font-size: 17px;
-      font-weight: bold;
-    }
+  padding:17px;
+  border-radius:28px;
 
-    #trackingStatus {
-      margin-top: 4px;
-      font-size: 13px;
-      color: #69d6ff;
-    }
+  background:rgba(5,20,40,.94);
+  border:1px solid rgba(255,255,255,.14);
+  box-shadow:0 20px 50px rgba(0,0,0,.4);
+  backdrop-filter:blur(20px);
 
-    /* Control panel */
-    #controlPanel {
-      position: fixed;
-      left: 50%;
-      bottom: 20px;
-      transform: translateX(-50%);
+  color:white;
+  display:none;
+}
 
-      z-index: 30;
+#dashboard.show{display:block}
 
-      width: calc(100% - 24px);
-      max-width: 430px;
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
 
-      padding: 18px;
+.title{
+  font-size:19px;
+  font-weight:bold;
+}
 
-      border-radius: 28px;
+.power{
+  padding:6px 12px;
+  border-radius:20px;
+  background:#26364a;
+  font-size:12px;
+}
 
-      background: rgba(7, 23, 43, 0.94);
-      border: 1px solid rgba(255,255,255,0.15);
+.power.on{
+  background:#11a86b;
+}
 
-      box-shadow: 0 15px 40px rgba(0,0,0,0.35);
+/* TEMPERATURE */
+.mainTemp{
+  text-align:center;
+  margin:3px 0 5px;
+}
 
-      backdrop-filter: blur(18px);
+#setTemp{
+  font-size:55px;
+  font-weight:800;
+}
 
-      display: none;
+.setLabel{
+  text-align:center;
+  font-size:11px;
+  opacity:.65;
+}
 
-      color: white;
-    }
+/* ROOM DATA */
+.stats{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  margin:13px 0;
+}
 
-    #controlPanel.show {
-      display: block;
-    }
+.stat{
+  padding:10px;
+  border-radius:14px;
+  background:#102943;
+  text-align:center;
+}
 
-    .panelHeader {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 14px;
-    }
+.statValue{
+  font-size:18px;
+  font-weight:bold;
+}
 
-    .panelTitle {
-      font-size: 20px;
-      font-weight: bold;
-    }
+.statLabel{
+  font-size:10px;
+  opacity:.6;
+  margin-top:2px;
+}
 
-    #powerStatus {
-      font-size: 13px;
-      padding: 6px 12px;
-      border-radius: 20px;
-      background: #26364a;
-    }
+/* BUTTONS */
+.row{
+  display:flex;
+  gap:8px;
+  margin-top:8px;
+}
 
-    #temperature {
-      text-align: center;
-      font-size: 54px;
-      font-weight: bold;
-      margin: 5px 0 16px;
-    }
+button{
+  flex:1;
+  border:0;
+  border-radius:14px;
+  padding:13px 7px;
+  color:white;
+  font-size:15px;
+  font-weight:bold;
+}
 
-    .tempLabel {
-      text-align: center;
-      font-size: 13px;
-      opacity: 0.7;
-      margin-top: -12px;
-      margin-bottom: 14px;
-    }
+button:active{
+  transform:scale(.97);
+}
 
-    .buttonRow {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-    }
+.tempBtn{
+  background:#28527e;
+  font-size:21px;
+}
 
-    button {
-      flex: 1;
-      border: none;
-      border-radius: 15px;
-      padding: 15px 10px;
+.onBtn{
+  background:#11ad70;
+}
 
-      font-size: 16px;
-      font-weight: bold;
+.offBtn{
+  background:#db4b4b;
+}
 
-      color: white;
-      cursor: pointer;
-    }
+.mode{
+  background:#1c395d;
+}
 
-    button:active {
-      transform: scale(0.96);
-    }
+.mode.active{
+  outline:2px solid #65ddff;
+  background:#27577e;
+}
 
-    .btnOn {
-      background: #12a866;
-    }
+.fan{
+  background:#173454;
+}
 
-    .btnOff {
-      background: #d94a4a;
-    }
+.fan.active{
+  outline:2px solid #8eeaff;
+}
 
-    .btnTemp {
-      background: #24466e;
-      font-size: 22px;
-    }
+/* TIMER */
+.timer{
+  margin-top:9px;
+  padding:11px;
+  border-radius:14px;
+  background:#102943;
+  text-align:center;
+  font-size:13px;
+}
 
-    .modeButton {
-      background: #1b3555;
-    }
-
-    .active {
-      outline: 2px solid #63d9ff;
-    }
-
-    #message {
-      text-align: center;
-      font-size: 12px;
-      opacity: 0.7;
-      margin-top: 10px;
-    }
-  </style>
+#demoMessage{
+  text-align:center;
+  margin-top:9px;
+  font-size:10px;
+  color:#8ea4bb;
+}
+</style>
 </head>
 
 <body>
 
-  <!-- Loading Screen -->
-  <div id="loading">
-    <div class="logo">❄️ SMART AIR</div>
-    <div class="sub">กำลังโหลดระบบ AR...</div>
+<!-- LOADING -->
+<div id="loading">
+  <div class="logo">❄️ SMART AIR</div>
+  <div class="sub">กำลังโหลดระบบ AR...</div>
+</div>
+
+<!-- TOP STATUS -->
+<div id="top">
+
+  <div class="topLine">
+    <div class="brand">❄️ SMART AIR</div>
+    <div id="connection" class="connected">● CONNECTED</div>
   </div>
 
-  <!-- Top Status -->
-  <div id="topBar">
-
-    <div id="deviceName">
-      ❄️ SMART AIR CONDITIONER
-    </div>
-
-    <div id="trackingStatus">
-      ● ตรวจพบเครื่องปรับอากาศ
-    </div>
-
+  <div class="location">
+    📍 Living Room · AR Device Detected
   </div>
 
-  <!-- Control Panel -->
-  <div id="controlPanel">
+</div>
 
-    <div class="panelHeader">
+<!-- DASHBOARD -->
+<div id="dashboard">
 
-      <div class="panelTitle">
-        ควบคุมเครื่องปรับอากาศ
-      </div>
+  <div class="header">
+    <div class="title">ควบคุมเครื่องปรับอากาศ</div>
+    <div id="powerStatus" class="power">OFF</div>
+  </div>
 
-      <div id="powerStatus">
-        OFF
-      </div>
+  <div class="mainTemp">
+    <span id="setTemp">25</span>°C
+  </div>
 
+  <div class="setLabel">
+    อุณหภูมิที่ตั้งไว้
+  </div>
+
+  <div class="row">
+    <button class="tempBtn" onclick="changeTemp(-1)">−</button>
+    <button class="tempBtn" onclick="changeTemp(1)">＋</button>
+  </div>
+
+  <div class="row">
+    <button class="onBtn" onclick="turnOn()">🟢 เปิดแอร์</button>
+    <button class="offBtn" onclick="turnOff()">🔴 ปิดแอร์</button>
+  </div>
+
+  <!-- ROOM STATUS -->
+  <div class="stats">
+
+    <div class="stat">
+      <div id="roomTemp" class="statValue">27.5°C</div>
+      <div class="statLabel">อุณหภูมิห้อง</div>
     </div>
 
-    <div id="temperature">
-      25°C
-    </div>
-
-    <div class="tempLabel">
-      อุณหภูมิที่ตั้งไว้
-    </div>
-
-    <div class="buttonRow">
-
-      <button class="btnTemp" onclick="changeTemp(-1)">
-        −
-      </button>
-
-      <button class="btnTemp" onclick="changeTemp(1)">
-        ＋
-      </button>
-
-    </div>
-
-    <div class="buttonRow">
-
-      <button class="btnOn" onclick="turnOn()">
-        🟢 เปิดแอร์
-      </button>
-
-      <button class="btnOff" onclick="turnOff()">
-        🔴 ปิดแอร์
-      </button>
-
-    </div>
-
-    <div class="buttonRow">
-
-      <button
-        id="coolButton"
-        class="modeButton active"
-        onclick="setMode('COOL')">
-        ❄️ COOL
-      </button>
-
-      <button
-        id="fanButton"
-        class="modeButton"
-        onclick="setMode('FAN')">
-        💨 FAN
-      </button>
-
-      <button
-        id="dryButton"
-        class="modeButton"
-        onclick="setMode('DRY')">
-        💧 DRY
-      </button>
-
-    </div>
-
-    <div id="message">
-      ระบบจำลอง — ยังไม่ได้เชื่อมต่อเครื่องปรับอากาศจริง
+    <div class="stat">
+      <div class="statValue">62%</div>
+      <div class="statLabel">ความชื้น</div>
     </div>
 
   </div>
 
+  <!-- MODE -->
+  <div class="row">
+
+    <button id="cool" class="mode active"
+            onclick="setMode('COOL')">
+      ❄️ COOL
+    </button>
+
+    <button id="dry" class="mode"
+            onclick="setMode('DRY')">
+      💧 DRY
+    </button>
+
+    <button id="auto" class="mode"
+            onclick="setMode('AUTO')">
+      AUTO
+    </button>
+
+  </div>
+
+  <!-- FAN -->
+  <div class="row">
+
+    <button id="fanAuto" class="fan active"
+            onclick="setFan('AUTO')">
+      AUTO
+    </button>
+
+    <button id="fanLow" class="fan"
+            onclick="setFan('LOW')">
+      LOW
+    </button>
 
-  <!-- AR -->
-  <a-scene
-    mindar-image="imageTargetSrc: ./targets.mind;"
-    color-space="sRGB"
-    renderer="colorManagement: true, physicallyCorrectLights"
-    vr-mode-ui="enabled: false"
-    device-orientation-permission-ui="enabled: false">
+    <button id="fanMed" class="fan"
+            onclick="setFan('MED')">
+      MED
+    </button>
 
-    <a-camera
-      position="0 0 0"
-      look-controls="enabled: false">
-    </a-camera>
+    <button id="fanHigh" class="fan"
+            onclick="setFan('HIGH')">
+      HIGH
+    </button>
 
+  </div>
 
-    <!-- Target -->
-    <a-entity
-      id="airTarget"
-      mindar-image-target="targetIndex: 0">
+  <div class="timer">
+    ⏱️ Timer: <strong id="timer">OFF</strong>
+  </div>
 
-      <!-- AR information panel -->
-      <a-plane
-        position="0 0.38 0.02"
-        width="1.45"
-        height="0.55"
-        color="#07172b"
-        opacity="0.90">
+  <div id="demoMessage">
+    DEMO MODE — ยังไม่ได้เชื่อมต่อ Hardware
+  </div>
 
-      </a-plane>
+</div>
 
-      <a-text
-        value="❄ SMART AIR"
-        position="0 0.48 0.04"
-        align="center"
-        color="#ffffff"
-        width="1.8">
-      </a-text>
 
-      <a-text
-        id="arTemperature"
-        value="25°C  •  OFF"
-        position="0 0.28 0.04"
-        align="center"
-        color="#63d9ff"
-        width="1.5">
-      </a-text>
+<!-- AR -->
+<a-scene
+  mindar-image="imageTargetSrc: ./targets.mind;"
+  color-space="sRGB"
+  renderer="colorManagement: true, physicallyCorrectLights"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false">
 
-    </a-entity>
+  <a-camera
+    position="0 0 0"
+    look-controls="enabled:false">
+  </a-camera>
 
-  </a-scene>
+  <a-entity
+    id="airTarget"
+    mindar-image-target="targetIndex:0">
 
+    <a-plane
+      position="0 0.40 0.02"
+      width="1.45"
+      height=".55"
+      color="#07172b"
+      opacity=".88">
+    </a-plane>
 
-  <script>
+    <a-text
+      value="❄ SMART AIR"
+      position="0 .50 .04"
+      align="center"
+      color="#ffffff"
+      width="1.8">
+    </a-text>
 
-    let temperature = 25;
-    let power = false;
-    let mode = "COOL";
+    <a-text
+      id="arStatus"
+      value="25°C • OFF"
+      position="0 .30 .04"
+      align="center"
+      color="#65ddff"
+      width="1.5">
+    </a-text>
 
-    const loading = document.getElementById("loading");
-    const controlPanel = document.getElementById("controlPanel");
-    const topBar = document.getElementById("topBar");
+  </a-entity>
 
-    const temperatureElement =
-      document.getElementById("temperature");
+</a-scene>
 
-    const powerStatus =
-      document.getElementById("powerStatus");
 
-    const message =
-      document.getElementById("message");
+<script>
 
-    const arTemperature =
-      document.getElementById("arTemperature");
+let power = false;
+let setTemperature = 25;
+let roomTemperature = 27.5;
+let mode = "COOL";
+let fan = "AUTO";
 
-    const scene =
-      document.querySelector("a-scene");
+const loading = document.getElementById("loading");
+const dashboard = document.getElementById("dashboard");
+const top = document.getElementById("top");
 
+const setTemp = document.getElementById("setTemp");
+const roomTemp = document.getElementById("roomTemp");
+const powerStatus = document.getElementById("powerStatus");
+const arStatus = document.getElementById("arStatus");
+const demoMessage = document.getElementById("demoMessage");
 
-    /* --------------------------------
-       AR Ready
-    -------------------------------- */
+const scene = document.querySelector("a-scene");
+const target = document.getElementById("airTarget");
 
-    scene.addEventListener("arReady", function () {
 
-      loading.classList.add("hidden");
+/* AR READY */
 
-    });
+scene.addEventListener("arReady", () => {
 
+  loading.classList.add("hidden");
 
-    /* --------------------------------
-       Target Found
-    -------------------------------- */
+});
 
-    const airTarget =
-      document.getElementById("airTarget");
 
-    airTarget.addEventListener(
-      "targetFound",
-      function () {
+/* TARGET FOUND */
 
-        topBar.classList.add("show");
+target.addEventListener("targetFound", () => {
 
-        controlPanel.classList.add("show");
+  top.classList.add("show");
+  dashboard.classList.add("show");
 
-      }
-    );
+});
 
 
-    /* --------------------------------
-       Target Lost
-    -------------------------------- */
+/* TARGET LOST */
 
-    airTarget.addEventListener(
-      "targetLost",
-      function () {
+target.addEventListener("targetLost", () => {
 
-        topBar.classList.remove("show");
+  top.classList.remove("show");
+  dashboard.classList.remove("show");
 
-        controlPanel.classList.remove("show");
+});
 
-      }
-    );
 
+/* POWER */
 
-    /* --------------------------------
-       Temperature
-    -------------------------------- */
+function turnOn(){
 
-    function changeTemp(value) {
+  power = true;
 
-      temperature += value;
+  demoMessage.innerText =
+    "DEMO: ส่งคำสั่งเปิดเครื่องปรับอากาศ";
 
-      if (temperature < 16) {
-        temperature = 16;
-      }
+  updateUI();
 
-      if (temperature > 30) {
-        temperature = 30;
-      }
+}
 
-      updateUI();
 
-    }
+function turnOff(){
 
+  power = false;
 
-    /* --------------------------------
-       Turn ON
-    -------------------------------- */
+  demoMessage.innerText =
+    "DEMO: ส่งคำสั่งปิดเครื่องปรับอากาศ";
 
-    function turnOn() {
+  updateUI();
 
-      power = true;
+}
 
-      message.innerText =
-        "จำลองคำสั่ง: เปิดเครื่องปรับอากาศ";
 
-      updateUI();
+/* TEMPERATURE */
 
-    }
+function changeTemp(value){
 
+  setTemperature += value;
 
-    /* --------------------------------
-       Turn OFF
-    -------------------------------- */
+  if(setTemperature < 16)
+    setTemperature = 16;
 
-    function turnOff() {
+  if(setTemperature > 30)
+    setTemperature = 30;
 
-      power = false;
+  updateUI();
 
-      message.innerText =
-        "จำลองคำสั่ง: ปิดเครื่องปรับอากาศ";
+}
 
-      updateUI();
 
-    }
+/* MODE */
 
+function setMode(value){
 
-    /* --------------------------------
-       Mode
-    -------------------------------- */
+  mode = value;
 
-    function setMode(newMode) {
+  document
+    .querySelectorAll(".mode")
+    .forEach(x => x.classList.remove("active"));
 
-      mode = newMode;
+  document
+    .getElementById(
+      value === "COOL" ? "cool" :
+      value === "DRY" ? "dry" : "auto"
+    )
+    .classList.add("active");
 
-      message.innerText =
-        "จำลองโหมด: " + newMode;
+  demoMessage.innerText =
+    "DEMO: Mode → " + value;
 
-      document
-        .querySelectorAll(".modeButton")
-        .forEach(button => {
+}
 
-          button.classList.remove("active");
 
-        });
+/* FAN */
 
+function setFan(value){
 
-      if (newMode === "COOL") {
+  fan = value;
 
-        document
-          .getElementById("coolButton")
-          .classList.add("active");
+  document
+    .querySelectorAll(".fan")
+    .forEach(x => x.classList.remove("active"));
 
-      }
+  const ids = {
+    AUTO:"fanAuto",
+    LOW:"fanLow",
+    MED:"fanMed",
+    HIGH:"fanHigh"
+  };
 
-      if (newMode === "FAN") {
+  document
+    .getElementById(ids[value])
+    .classList.add("active");
 
-        document
-          .getElementById("fanButton")
-          .classList.add("active");
+  demoMessage.innerText =
+    "DEMO: Fan Speed → " + value;
 
-      }
+}
 
-      if (newMode === "DRY") {
 
-        document
-          .getElementById("dryButton")
-          .classList.add("active");
+/* UPDATE */
 
-      }
+function updateUI(){
 
-      updateUI();
+  setTemp.innerText = setTemperature;
 
-    }
+  roomTemp.innerText =
+    roomTemperature.toFixed(1) + "°C";
 
+  powerStatus.innerText =
+    power ? "ON" : "OFF";
 
-    /* --------------------------------
-       Update UI
-    -------------------------------- */
+  powerStatus.classList.toggle("on", power);
 
-    function updateUI() {
+  arStatus.setAttribute(
+    "value",
+    setTemperature + "°C • " +
+    (power ? "ON" : "OFF")
+  );
 
-      temperatureElement.innerText =
-        temperature + "°C";
+}
 
 
-      powerStatus.innerText =
-        power ? "ON" : "OFF";
+/* SIMULATE COOLING */
 
+setInterval(() => {
 
-      powerStatus.style.background =
-        power ? "#12a866" : "#26364a";
+  if(power && roomTemperature > setTemperature){
 
+    roomTemperature -= .1;
 
-      arTemperature.setAttribute(
-        "value",
-        temperature + "°C  •  " +
-        (power ? "ON" : "OFF")
-      );
+    if(roomTemperature < setTemperature)
+      roomTemperature = setTemperature;
 
-    }
+    updateUI();
 
+  }
 
-    /* --------------------------------
-       Error
-    -------------------------------- */
+}, 2000);
 
-    scene.addEventListener(
-      "arError",
-      function (event) {
 
-        console.error(
-          "MindAR Error:",
-          event
-        );
+/* ERROR */
 
-        loading.innerHTML = `
-          <div class="logo">❌ SMART AIR</div>
-          <div class="sub">
-            ไม่สามารถเริ่มระบบ AR ได้<br>
-            กรุณาตรวจสอบ Camera และ targets.mind
-          </div>
-        `;
+scene.addEventListener("arError", () => {
 
-      }
-    );
+  loading.innerHTML = `
+    <div class="logo">❌ SMART AIR</div>
+    <div class="sub">
+      ไม่สามารถเริ่มระบบ AR ได้
+    </div>
+  `;
 
-  </script>
+});
+
+</script>
 
 </body>
 </html>
